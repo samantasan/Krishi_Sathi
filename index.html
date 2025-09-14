@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Krishi Sathi</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: url("istockphoto-681117656-612x612.jpg") no-repeat center center/cover;
+      color: #222;
+      min-height: 100vh;
+    }
+    h1 {
+      color: white;
+      text-shadow: 2px 2px 5px black;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.9);
+      margin: 20px auto;
+      padding: 25px;
+      width: 85%;
+      max-width: 400px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    button {
+      margin: 12px;
+      padding: 15px 25px;
+      font-size: 18px;
+      border-radius: 10px;
+      border: none;
+      background-color: green;
+      color: white;
+      cursor: pointer;
+      width: 90%;
+      max-width: 350px;
+    }
+    button.back {
+      background-color: gray;
+      width: auto;
+    }
+    input, textarea {
+      display: block;
+      margin: 12px auto;
+      padding: 12px;
+      width: 80%;
+      max-width: 300px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    #result, #diseaseResult {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    #chatbox {
+      border: 1px solid #ccc;
+      padding: 12px;
+      width: 90%;
+      max-width: 350px;
+      margin: 20px auto;
+      height: 220px;
+      overflow-y: auto;
+      text-align: left;
+      background: white;
+      border-radius: 10px;
+    }
+    .user { color: blue; margin: 5px 0; }
+    .bot { color: green; margin: 5px 0; }
+  </style>
+</head>
+<body>
+
+  <h1>🌾 Krishi Sathi</h1>
+
+  <!-- Home Page -->
+  <div id="home" class="card">
+    <button onclick="showPage('crop')">🌱 Crop Recommendation</button>
+    <button onclick="showPage('weather')">🌦 Weather Forecast & Alerts</button>
+    <button onclick="showPage('disease')">🌿 Disease Identification</button>
+    <button onclick="showPage('chatbot')">🤖 Personal Chatbot</button>
+  </div>
+
+  <!-- Crop Recommendation -->
+  <div id="crop" class="card" style="display: none;">
+    <h2>🌱 Crop Recommendation</h2>
+    <input type="text" id="soil" placeholder="Soil Type">
+    <input type="number" id="ph" placeholder="Soil pH">
+    <input type="number" id="temp" placeholder="Temperature (°C)">
+    <input type="number" id="rain" placeholder="Rainfall (mm)">
+    <br>
+    <button onclick="recommendCrop()">Get Recommendation</button>
+    <p id="result"></p>
+    <br>
+    <button class="back" onclick="showPage('home')">⬅ Back</button>
+  </div>
+
+  <!-- Weather Forecast -->
+  <div id="weather" class="card" style="display: none;">
+    <h2>🌦 Weather Forecast & Alerts</h2>
+    <p id="weatherInfo">Loading...</p>
+    <button class="back" onclick="showPage('home')">⬅ Back</button>
+  </div>
+
+  <!-- Disease Identification -->
+  <div id="disease" class="card" style="display: none;">
+    <h2>🌿 Disease Identification</h2>
+    <textarea id="symptoms" placeholder="Describe plant symptoms..."></textarea>
+    <button onclick="identifyDisease()">Identify Disease</button>
+    <p id="diseaseResult"></p>
+    <button class="back" onclick="showPage('home')">⬅ Back</button>
+  </div>
+
+  <!-- Personal Chatbot -->
+  <div id="chatbot" class="card" style="display: none;">
+    <h2>🤖 Personal Chatbot</h2>
+    <div id="chatbox"></div>
+    <input type="text" id="userInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter'){sendMessage()}">
+    <button onclick="sendMessage()">Send</button>
+    <button class="back" onclick="showPage('home')">⬅ Back</button>
+  </div>
+
+  <script>
+    function showPage(page) {
+      document.getElementById("home").style.display = "none";
+      document.getElementById("crop").style.display = "none";
+      document.getElementById("weather").style.display = "none";
+      document.getElementById("disease").style.display = "none";
+      document.getElementById("chatbot").style.display = "none";
+      document.getElementById(page).style.display = "block";
+    }
+
+    // ----------------- Crop Recommendation -----------------
+    function recommendCrop() {
+      const ph = parseFloat(document.getElementById("ph").value) || 7.0;
+      const temp = parseFloat(document.getElementById("temp").value) || 25.0;
+      const rain = parseFloat(document.getElementById("rain").value) || 100.0;
+
+      let result = "";
+      if (ph >= 6 && ph <= 7.5 && temp >= 20 && temp <= 30) {
+        result = "🌾 Wheat, 🌽 Maize";
+      } else if (rain > 150) {
+        result = "🌾 Rice, 🌱 Sugarcane";
+      } else if (temp > 30) {
+        result = "🌿 Cotton, 🌻 Sunflower";
+      } else {
+        result = "🥔 Potato, 🥕 Carrot";
+      }
+
+      document.getElementById("result").innerText = "Recommended Crops: " + result;
+    }
+
+    // ----------------- Weather Forecast -----------------
+    const apiKey = "YOUR_OPENWEATHERMAP_API_KEY"; // Replace with your key
+    const city = "Kolkata";
+
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
+      .then(res => res.json())
+      .then(data => {
+        let info = `
+          🌍 City: ${data.name}<br>
+          🌡 Temp: ${data.main.temp} °C<br>
+          ☁️ Condition: ${data.weather[0].description}
+        `;
+        if (data.weather[0].main.toLowerCase().includes("rain")) {
+          info += `<br><span style="color:red;font-weight:bold">⚠️ Alert: Heavy Rain Expected!</span>`;
+        }
+        document.getElementById("weatherInfo").innerHTML = info;
+      })
+      .catch(() => {
+        document.getElementById("weatherInfo").innerText = "⚠️ Failed to load weather data.";
+      });
+
+    // ----------------- Disease Identification -----------------
+    function identifyDisease() {
+      const symptoms = document.getElementById("symptoms").value.toLowerCase();
+      let result = "⚠️ Unable to identify. Please consult an expert.";
+
+      if (symptoms.includes("yellow") && symptoms.includes("leaf")) {
+        result = "🌿 Possible Nitrogen Deficiency or Leaf Blight.";
+      } else if (symptoms.includes("spots") && symptoms.includes("brown")) {
+        result = "🍂 Possible Fungal Infection (Rust/Leaf Spot).";
+      } else if (symptoms.includes("wilting")) {
+        result = "🥀 Possible Bacterial Wilt or Root Issue.";
+      }
+
+      document.getElementById("diseaseResult").innerText = result;
+    }
+
+    // ----------------- Chatbot -----------------
+    function sendMessage() {
+      const input = document.getElementById("userInput").value;
+      if (!input) return;
+
+      const chatbox = document.getElementById("chatbox");
+      chatbox.innerHTML += `<div class="user">👩‍🌾 You: ${input}</div>`;
+
+      let response = "🤖 Sorry, I don't understand.";
+      if (input.toLowerCase().includes("hello")) {
+        response = "🌾 Hello! How can I help you with farming today?";
+      } else if (input.toLowerCase().includes("crop")) {
+        response = "🌱 You can use the Crop Recommendation tool to find best crops.";
+      } else if (input.toLowerCase().includes("weather")) {
+        response = "🌦 Use Weather Forecast section to check alerts.";
+      } else if (input.toLowerCase().includes("disease")) {
+        response = "🌿 Try the Disease Identification tool by describing symptoms.";
+      }
+
+      chatbox.innerHTML += `<div class="bot">🤖 Bot: ${response}</div>`;
+      document.getElementById("userInput").value = "";
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+  </script>
+
+</body>
+</html>
